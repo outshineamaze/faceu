@@ -1,7 +1,6 @@
 import React, { Component, PureComponent } from 'react';
-import { Upload, Icon, message, Form, Input, Tooltip, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete, Avatar as AvatarImage } from 'antd';
-import {  Link } from 'react-router-dom'
-import { withRouter } from 'react-router'
+import { Upload, Icon, message, Form, Input, Button, Avatar as AvatarImage } from 'antd';
+
 function getBase64(img, callback) {
   const reader = new FileReader();
   reader.addEventListener('load', () => callback(reader.result));
@@ -32,7 +31,11 @@ class Avatar extends React.Component {
         imageUrl,
         loading: false,
       }));
-      message.loading('正在注册人脸信息');
+      this.props.onImageUpload(info.file.response)
+    }
+
+    if (info.file.status === 'error') {
+      this.setState({ loading: false });
       this.props.onImageUpload(info.file.response)
     }
   }
@@ -41,17 +44,18 @@ class Avatar extends React.Component {
     const uploadButton = (
       <div>
         <Icon type={this.state.loading ? 'loading' : 'plus'} />
-        <div className="ant-upload-text">点击上传人脸信息</div>
+        <div className="ant-upload-text">人脸注册</div>
       </div>
     );
     const imageUrl = this.state.imageUrl;
     return (
       <Upload
         name="avatar"
+        data={this.props.form}
         listType="picture-card"
         className="avatar-uploader"
         showUploadList={false}
-        action="/person/upload_img"
+        action="/person/new"
         beforeUpload={beforeUpload}
         onChange={this.handleChange}
       >
@@ -67,16 +71,14 @@ class Avatar extends React.Component {
 
 
 const FormItem = Form.Item;
-const Option = Select.Option;
-const AutoCompleteOption = AutoComplete.Option;
 
 
 
 class RegistrationForm extends React.Component {
   state = {
-    confirmDirty: false,
-    autoCompleteResult: [],
+    confirmDirty: false
   };
+
 
   handleSubmit = (e) => {
     e.preventDefault();
@@ -135,42 +137,6 @@ class RegistrationForm extends React.Component {
          
         </FormItem>
       </Form>
-
-      // <Form onSubmit={this.handleSubmit}>
-      //   <FormItem
-      //     {...formItemLayout}
-      //     label="ID"
-      //   >
-      //     {getFieldDecorator('id', {
-      //       rules: [{
-      //        required: true, message: 'Please input your E-mail!',
-      //       }],
-      //     })(
-      //       <Input />
-      //       )}
-      //   </FormItem>
-
-      //   <FormItem
-      //     {...formItemLayout}
-      //     label={(
-      //       <span>
-      //         Nickname&nbsp;
-      //         <Tooltip title="What do you want others to call you?">
-      //           <Icon type="question-circle-o" />
-      //         </Tooltip>
-      //       </span>
-      //     )}
-      //   >
-      //     {getFieldDecorator('name', {
-      //       rules: [{ required: true, message: 'Please input your nickname!', whitespace: true }],
-      //     })(
-      //       <Input />
-      //       )}
-      //   </FormItem>
-      //   <FormItem {...tailFormItemLayout}>
-      //     <Button type="primary" htmlType="submit">下一步</Button>
-      //   </FormItem>
-      // </Form>
     );
   }
 }
@@ -186,7 +152,10 @@ class PersonNew extends PureComponent {
     }
     this.onSubmit = this.onSubmit.bind(this)
     this.onImageUpload = this.onImageUpload.bind(this)
+    this.onReset = this.onReset.bind(this)
+    
   }
+
   onSubmit(value) {
     this.setState(
       {
@@ -198,49 +167,35 @@ class PersonNew extends PureComponent {
   onImageUpload(result) {
     console.log(result)
 
-    fetch("/person/new", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(Object.assign({}, this.state.form, {
-        image_path: result.path
-      }))
-    }).then((response) => {
-      return response.json()
-    }).then((result) => {
-      console.log(result)
-      message.destroy()
       if (result.code == 0) {
         this.setState({
           step: 2,
           result: result
         })
       } else {
-        message.error(result.message)
+        message.error(result.message || '系统错误')
         this.setState({
           step: 0
         })
       }
-      
-    }).catch((error) => {
-      message.error(error.message)
-        this.setState({
-          step: 0
-        })
-    })
+  }
+  onReset() {
+    this.setState(
+      {
+        step: 0
+      }
+    )
   }
   render() {
-    console.log(this.state)
     const WrappedRegistrationForm = Form.create()(RegistrationForm);
     let content = null
     if (this.state.step == 0) {
       content= (<div className="login-form-container"><WrappedRegistrationForm onSubmit={this.onSubmit} /></div>)
     } else if (this.state.step == 1) {
-      content= (<div className="upload-img-container"><div className="upload-img-content"><Avatar onImageUpload={this.onImageUpload} /></div></div>)
+      content= (<div className="upload-img-container"><div className="upload-img-content"><Avatar form={this.state.form} onImageUpload={this.onImageUpload} /></div></div>)
     } else {
       if (this.state.step === 2) {
-        content= (<span>恭喜完成注册人脸信息<Link to="/new">继续注册</Link></span>)
+        content= (<span>恭喜完成注册人脸信息<a onClick={this.onReset}>继续注册</a></span>)
       } else {
         content= (
           <span>注册失败</span>
@@ -253,4 +208,4 @@ class PersonNew extends PureComponent {
 
 
 
-export default withRouter(PersonNew)
+export default PersonNew

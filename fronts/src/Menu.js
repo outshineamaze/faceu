@@ -31,7 +31,7 @@ class MenuComponent extends Component {
           <Link to="/new"><Icon type="team" />新增人脸</Link>
         </Menu.Item>
         <Menu.Item key="list">
-          <Link to="/list"><Icon type="table" />人脸列表</Link>
+          <Link to="/list"><Icon type="table" />已注册列表</Link>
         </Menu.Item>
         <Menu.Item key="check">
           <Link to="/check"><Icon type="smile-o" />搜索人脸</Link>

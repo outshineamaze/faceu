@@ -27,6 +27,7 @@ class CheckFace extends React.Component {
         loading: false,
         result: {}
       };
+      this.onReset = this.onReset.bind(this)
   }
   handleChange = (info) => {
     if (info.file.status === 'uploading') {
@@ -49,11 +50,19 @@ class CheckFace extends React.Component {
     
   }
 
+  onReset() {
+    this.setState(
+      {
+        result: {}
+      }
+    )
+  }
+
   render() {
     const uploadButton = (
       <div>
         <Icon type={this.state.loading ? 'loading' : 'plus'} />
-        <div className="ant-upload-text">点击人脸识别验证</div>
+        <div className="ant-upload-text">人脸识别</div>
       </div>
     );
     const imageUrl = this.state.imageUrl;
@@ -62,6 +71,7 @@ class CheckFace extends React.Component {
         if (result.data.group_size > 0 && result.data.candidates) {
             const mostCandidateOne = result.data.candidates[0]
             return (
+                <div>
         <div  style={{ width: '100%', marginLeft: '50%' }}>
                 <Card
                 style={{ width: 300,marginLeft: -150 }}
@@ -74,6 +84,9 @@ class CheckFace extends React.Component {
                   description={`匹配程度: ${mostCandidateOne.confidence}%`}
                 />
               </Card>
+             
+              </div>
+              <a onClick={this.onReset}>返回</a>
               </div>
             )
         } else {
@@ -82,7 +95,8 @@ class CheckFace extends React.Component {
         
     } else {
         return (
-            <div className="login-form-container">
+            <div className="upload-img-container">
+            <div className="upload-img-content">
             <Upload
               name="avatar"
               listType="picture-card"
@@ -92,8 +106,9 @@ class CheckFace extends React.Component {
               beforeUpload={beforeUpload}
               onChange={this.handleChange}
             >
-              {imageUrl ? <img src={imageUrl} alt="avatar" /> : uploadButton}
+              {imageUrl ? <Avatar shape="square" size={102} icon="user" src={imageUrl} alt="avatar" /> : uploadButton}
             </Upload>
+            </div>
             </div>
           );
     }

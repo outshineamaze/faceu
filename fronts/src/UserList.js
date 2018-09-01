@@ -45,7 +45,7 @@ class LoadMoreList extends React.Component {
         className="demo-loadmore-list"
         loading={loading}
         itemLayout="horizontal"
-        loadMore={loadMore}
+        //loadMore={loadMore}
         dataSource={data}
         renderItem={item => (
           <List.Item actions={[<a>添加人脸</a>, <a>删除</a>]}>
